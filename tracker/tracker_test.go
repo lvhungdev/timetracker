@@ -5,12 +5,32 @@ import (
 	"time"
 )
 
+type mockRepo struct {
+	records []Record
+}
+
+func newMockRepo(records []Record) *mockRepo {
+	if records == nil {
+		records = []Record{}
+	}
+
+	return &mockRepo{
+		records: records,
+	}
+}
+
+func (r *mockRepo) GetToday() []Record {
+	return r.records
+}
+
+func (r *mockRepo) SaveAll(records []Record) error {
+	r.records = records
+	return nil
+}
+
 func TestGetCurrent(t *testing.T) {
-	tracker := New()
-	tracker.records = append(tracker.records, Record{
-		Name:  "task 1",
-		Start: time.Now(),
-	})
+	repo := newMockRepo([]Record{newRecord("task 1", time.Now())})
+	tracker := New(repo)
 
 	curr := tracker.GetCurrent()
 
@@ -23,7 +43,7 @@ func TestGetCurrent(t *testing.T) {
 }
 
 func TestStartTracking(t *testing.T) {
-	tracker := New()
+	tracker := New(newMockRepo(nil))
 	curr, new, err := tracker.StartTracking("task 1")
 
 	if err != nil {
@@ -41,11 +61,8 @@ func TestStartTracking(t *testing.T) {
 }
 
 func TestStartTrackingWithCurr(t *testing.T) {
-	tracker := New()
-	tracker.records = append(tracker.records, Record{
-		Name:  "task 1",
-		Start: time.Now(),
-	})
+	repo := newMockRepo([]Record{newRecord("task 1", time.Now())})
+	tracker := New(repo)
 
 	curr, new, err := tracker.StartTracking("task 2")
 
@@ -67,7 +84,7 @@ func TestStartTrackingWithCurr(t *testing.T) {
 }
 
 func TestStartTrackingEmptyName(t *testing.T) {
-	tracker := New()
+	tracker := New(newMockRepo(nil))
 
 	_, _, err := tracker.StartTracking("")
 
@@ -77,11 +94,8 @@ func TestStartTrackingEmptyName(t *testing.T) {
 }
 
 func TestStopTracking(t *testing.T) {
-	tracker := New()
-	tracker.records = append(tracker.records, Record{
-		Name:  "task 1",
-		Start: time.Now(),
-	})
+	repo := newMockRepo([]Record{newRecord("task 1", time.Now())})
+	tracker := New(repo)
 
 	curr, err := tracker.StopTracking()
 	if err != nil {
@@ -96,7 +110,7 @@ func TestStopTracking(t *testing.T) {
 }
 
 func TestStopTrackingError(t *testing.T) {
-	tracker := New()
+	tracker := New(newMockRepo(nil))
 
 	_, err := tracker.StopTracking()
 	if err == nil {

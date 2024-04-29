@@ -3,21 +3,36 @@ package tracker
 import (
 	"errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Record struct {
+	Id    string
 	Name  string
 	Start time.Time
 	End   time.Time
 }
 
+func newRecord(name string, start time.Time) Record {
+	return Record{
+		Id:    uuid.NewString(),
+		Name:  name,
+		Start: start,
+	}
+}
+
 type Tracker struct {
+	repo    Repo
 	records []Record
 }
 
-func New() *Tracker {
+func New(repo Repo) *Tracker {
+	records := repo.GetToday()
+
 	return &Tracker{
-		records: []Record{},
+		repo:    repo,
+		records: records,
 	}
 }
 
@@ -44,10 +59,7 @@ func (t *Tracker) StartTracking(name string) (curr *Record, new *Record, err err
 		curr.End = now
 	}
 
-	t.records = append(t.records, Record{
-		Name:  name,
-		Start: now,
-	})
+	t.records = append(t.records, newRecord(name, now))
 
 	new = &t.records[len(t.records)-1]
 
@@ -63,4 +75,8 @@ func (t *Tracker) StopTracking() (*Record, error) {
 	curr.End = time.Now()
 
 	return curr, nil
+}
+
+func (t *Tracker) Save() error {
+	return t.repo.SaveAll(t.records)
 }
