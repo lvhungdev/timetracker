@@ -75,6 +75,9 @@ func TestStartTrackingWithCurr(t *testing.T) {
 	if curr.Name != "task 1" {
 		t.Fatalf("expect curr.Name 'task 1', got '%v'", curr.Name)
 	}
+    if curr.End.IsZero() {
+        t.Fatalf("expect curr.End not zero, got zero")
+    }
 	if new == nil {
 		t.Fatalf("expect new not nil, got nil")
 	}

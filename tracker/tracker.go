@@ -37,9 +37,9 @@ func New(repo Repo) *Tracker {
 }
 
 func (t *Tracker) GetCurrent() *Record {
-	for _, r := range t.records {
-		if r.End.IsZero() {
-			return &r
+	for i := 0; i < len(t.records); i++ {
+		if t.records[i].End.IsZero() {
+			return &t.records[i]
 		}
 	}
 

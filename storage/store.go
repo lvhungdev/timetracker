@@ -3,6 +3,7 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -96,7 +97,7 @@ func (s *Store) save(record tracker.Record) error {
 }
 
 func (s *Store) readFile(name string) ([]byte, error) {
-	file, err := os.Create(filepath.Join(s.path, name))
+	file, err := os.Open(filepath.Join(s.path, name))
 	if err != nil {
 		return nil, err
 	}
@@ -108,14 +109,14 @@ func (s *Store) readFile(name string) ([]byte, error) {
 		buffer := make([]byte, 512)
 		n, err := reader.Read(buffer)
 		if err != nil {
-			return nil, err
+			if err == io.EOF {
+				return data, nil
+			} else {
+				return nil, err
+			}
 		}
 
 		data = append(data, buffer[:n]...)
-
-		if n < len(buffer) {
-			return data, nil
-		}
 	}
 }
 
