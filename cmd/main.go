@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -17,31 +18,46 @@ func main() {
 
 	t := tracker.New(&s)
 
-	curr, new, err := t.StartTracking("task 1")
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = t.Save()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	if curr != nil {
-		renderer.RenderRecord(os.Stdout, *curr)
-	}
-	if new != nil {
-		renderer.RenderRecord(os.Stdout, *new)
+	if err := handle(t, os.Args[1:]); err != nil {
+		fmt.Printf("[ERROR] %v", err)
 	}
 }
 
-func handle(args []string) error {
-	if len(args) == 0 {
+func handle(t *tracker.Tracker, args []string) error {
+	cmd, err := getCommand(args)
+	if err != nil {
+		return err
+	}
 
-	} else if args[0] == "start" {
+	switch cmd := cmd.(type) {
+	case cmdGetCurrent:
+		r := t.GetCurrent()
+		if r == nil {
+			fmt.Println("no current tracker found")
+			return nil
+		}
+		renderer.RenderRecord(os.Stdout, *r)
 
-	} else if args[0] == "stop" {
+	case cmdStartTracking:
+		old, curr, err := t.StartTracking(cmd.name)
+		if err != nil {
+			return err
+		}
+		if err := t.Save(); err != nil {
+			return err
+		}
+		renderer.RenderRecord(os.Stdout, *old)
+		renderer.RenderRecord(os.Stdout, *curr)
 
+	case cmdStopTracking:
+		r, err := t.StopTracking()
+		if err != nil {
+			return err
+		}
+		if err := t.Save(); err != nil {
+			return err
+		}
+		renderer.RenderRecord(os.Stdout, *r)
 	}
 
 	return nil

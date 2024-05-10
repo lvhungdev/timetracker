@@ -7,13 +7,16 @@ import (
 	"github.com/lvhungdev/tt/tracker"
 )
 
-func RenderRecord(writer io.Writer, record tracker.Record) (int, error) {
+func RenderRecord(writer io.Writer, record tracker.Record) {
 	var content string
 
 	if record.End.IsZero() {
 		content += "tracking \"" + record.Name + "\"\n"
 		content += "  started: " + record.Start.Local().Format("2006-01-02 15:04:05") + "\n"
 		content += "  current: " + timeDiffString(record.Start, time.Now()) + "\n"
+		if record.Start.Sub(time.Now()).Abs().Seconds() > 1 {
+			content += "  total  : " + durationString(record.Start, time.Now()) + "\n"
+		}
 	} else {
 		content += "recorded \"" + record.Name + "\"\n"
 		content += "  started: " + record.Start.Local().Format("2006-01-02 15:04:05") + "\n"
@@ -21,5 +24,9 @@ func RenderRecord(writer io.Writer, record tracker.Record) (int, error) {
 		content += "  total  : " + durationString(record.Start, record.End) + "\n"
 	}
 
-	return writer.Write([]byte(content))
+	_, err := writer.Write([]byte(content))
+	if err != nil {
+		// TODO handle error properly
+		panic(err)
+	}
 }
