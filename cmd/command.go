@@ -42,6 +42,14 @@ func newCmdStopTracking() command {
 	return cmdStopTracking{cmdBase{time.Now()}}
 }
 
+type cmdReport struct {
+	cmdBase
+}
+
+func newCmdReport() command {
+	return cmdReport{cmdBase{time.Now()}}
+}
+
 func getCommand(args []string) (command, error) {
 	if len(args) == 0 {
 		return newCmdGetCurrent(), nil
@@ -56,6 +64,9 @@ func getCommand(args []string) (command, error) {
 
 	case "stop":
 		return newCmdStopTracking(), nil
+
+	case "report":
+		return newCmdReport(), nil
 
 	default:
 		return nil, fmt.Errorf("unknown command: %s", args[0])

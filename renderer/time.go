@@ -25,7 +25,11 @@ func timeDiffString(t1 time.Time, t2 time.Time) string {
 	return t2.Local().Format(fmtStr)
 }
 
-func durationString(t1 time.Time, t2 time.Time) string {
+func durationDiffString(t1 time.Time, t2 time.Time) string {
+	if t1.IsZero() || t2.IsZero() {
+		return ""
+	}
+
 	var result string
 
 	d := t2.Sub(t1).Abs().Round(time.Second)
@@ -51,4 +55,41 @@ func durationString(t1 time.Time, t2 time.Time) string {
 	}
 
 	return result
+}
+
+func durationString(t1 time.Time, t2 time.Time) string {
+	if t1.IsZero() || t2.IsZero() {
+		return ""
+	}
+
+	dInSec := int(t2.Sub(t1).Abs().Round(time.Second).Seconds())
+
+	if dInSec < 60 {
+		return fmt.Sprintf("%02d:%02d:%02d", 0, 0, dInSec)
+	} else if dInSec < 3600 {
+		mins := dInSec / 60
+		secs := dInSec % 60
+		return fmt.Sprintf("%02d:%02d:%02d", 0, mins, secs)
+	} else {
+		hours := dInSec / 3600
+		mins := (dInSec % 3600) / 60
+		secs := dInSec % 60
+		return fmt.Sprintf("%02d:%02d:%02d", hours, mins, secs)
+	}
+}
+
+func timeDateString(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+
+	return t.Format("2006-01-02")
+}
+
+func timeHourString(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+
+	return t.Format("15:04:05")
 }

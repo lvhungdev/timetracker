@@ -2,6 +2,7 @@ package tracker
 
 import (
 	"errors"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,6 +31,10 @@ type Tracker struct {
 func New(repo Repo) *Tracker {
 	records := repo.GetToday()
 
+	sort.Slice(records, func(i, j int) bool {
+		return records[i].Start.Before(records[j].Start)
+	})
+
 	return &Tracker{
 		repo:    repo,
 		records: records,
@@ -44,6 +49,26 @@ func (t *Tracker) GetCurrent() *Record {
 	}
 
 	return nil
+}
+
+func (t *Tracker) GetAll(from, to time.Time) []Record {
+	results := []Record{}
+
+	for curr := from; curr.Sub(to).Hours() <= 24; curr = curr.AddDate(0, 0, 1) {
+		records := t.repo.GetFromDate(curr)
+		for _, r := range records {
+			if (r.Start.After(from) || r.Start == from) && (r.End.Before(to) || r.End == to) {
+				results = append(results, r)
+			}
+		}
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Start.Before(results[j].Start)
+	})
+
+	t.records = results
+	return t.records
 }
 
 func (t *Tracker) StartTracking(name string) (old *Record, curr *Record, err error) {

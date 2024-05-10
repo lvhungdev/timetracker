@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/lvhungdev/tt/renderer"
 	"github.com/lvhungdev/tt/storage"
@@ -33,7 +34,7 @@ func handle(t *tracker.Tracker, args []string) error {
 	case cmdGetCurrent:
 		r := t.GetCurrent()
 		if r == nil {
-			fmt.Println("no current tracker found")
+			fmt.Println("no active time tracking")
 			return nil
 		}
 		renderer.RenderRecord(os.Stdout, *r)
@@ -47,7 +48,9 @@ func handle(t *tracker.Tracker, args []string) error {
 			return err
 		}
 		renderer.RenderRecord(os.Stdout, *old)
-		renderer.RenderRecord(os.Stdout, *curr)
+		if curr != nil {
+			renderer.RenderRecord(os.Stdout, *curr)
+		}
 
 	case cmdStopTracking:
 		r, err := t.StopTracking()
@@ -58,6 +61,14 @@ func handle(t *tracker.Tracker, args []string) error {
 			return err
 		}
 		renderer.RenderRecord(os.Stdout, *r)
+
+	case cmdReport:
+		now := time.Now()
+		from := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+		to := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.UTC)
+		records := t.GetAll(from, to)
+
+		renderer.RenderRecords(os.Stdout, records)
 	}
 
 	return nil
