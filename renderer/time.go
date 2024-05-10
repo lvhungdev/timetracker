@@ -44,7 +44,7 @@ func durationString(t1 time.Time, t2 time.Time) string {
 		result = fmt.Sprintf("%02d:%02d:%02d", hours, mins, secs)
 	}
 
-	length := len(("2006-01-02 15:04:05"))
+	length := len("2006-01-02 15:04:05")
 	spaceToFill := length - len(result)
 	for i := 0; i < spaceToFill; i++ {
 		result = " " + result

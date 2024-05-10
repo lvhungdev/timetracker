@@ -44,30 +44,13 @@ func TestGetCurrent(t *testing.T) {
 
 func TestStartTracking(t *testing.T) {
 	tracker := New(newMockRepo(nil))
-	curr, new, err := tracker.StartTracking("task 1")
+	old, curr, err := tracker.StartTracking("task 1")
 
 	if err != nil {
 		t.Fatalf("expect error nil, got %v", err)
 	}
-	if curr != nil {
-		t.Fatalf("expect curr nil, got not nil")
-	}
-	if new == nil {
-		t.Fatalf("expect new not nil, got nil")
-	}
-	if new.Name != "task 1" {
-		t.Fatalf("expect new.Name 'task 1', got '%v'", new.Name)
-	}
-}
-
-func TestStartTrackingWithCurr(t *testing.T) {
-	repo := newMockRepo([]Record{newRecord("task 1", time.Now())})
-	tracker := New(repo)
-
-	curr, new, err := tracker.StartTracking("task 2")
-
-	if err != nil {
-		t.Fatalf("expect error nil, got %v", err)
+	if old != nil {
+		t.Fatalf("expect old nil, got not nil")
 	}
 	if curr == nil {
 		t.Fatalf("expect curr not nil, got nil")
@@ -75,14 +58,31 @@ func TestStartTrackingWithCurr(t *testing.T) {
 	if curr.Name != "task 1" {
 		t.Fatalf("expect curr.Name 'task 1', got '%v'", curr.Name)
 	}
-    if curr.End.IsZero() {
-        t.Fatalf("expect curr.End not zero, got zero")
-    }
-	if new == nil {
-		t.Fatalf("expect new not nil, got nil")
+}
+
+func TestStartTrackingWithCurr(t *testing.T) {
+	repo := newMockRepo([]Record{newRecord("task 1", time.Now())})
+	tracker := New(repo)
+
+	old, curr, err := tracker.StartTracking("task 2")
+
+	if err != nil {
+		t.Fatalf("expect error nil, got %v", err)
 	}
-	if new.Name != "task 2" {
-		t.Fatalf("expect new.name 'task 2', got '%v'", new.Name)
+	if old == nil {
+		t.Fatalf("expect old not nil, got nil")
+	}
+	if old.Name != "task 1" {
+		t.Fatalf("expect old.Name 'task 1', got '%v'", old.Name)
+	}
+	if old.End.IsZero() {
+		t.Fatalf("expect old.End not zero, got zero")
+	}
+	if curr == nil {
+		t.Fatalf("expect curr not nil, got nil")
+	}
+	if curr.Name != "task 2" {
+		t.Fatalf("expect curr.name 'task 2', got '%v'", curr.Name)
 	}
 }
 

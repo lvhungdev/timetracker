@@ -46,7 +46,7 @@ func (t *Tracker) GetCurrent() *Record {
 	return nil
 }
 
-func (t *Tracker) StartTracking(name string) (curr *Record, new *Record, err error) {
+func (t *Tracker) StartTracking(name string) (old *Record, curr *Record, err error) {
 	if name == "" {
 		err = errors.New("name cannot be empty")
 		return
@@ -54,14 +54,14 @@ func (t *Tracker) StartTracking(name string) (curr *Record, new *Record, err err
 
 	now := time.Now()
 
-	curr = t.GetCurrent()
-	if curr != nil {
-		curr.End = now
+	old = t.GetCurrent()
+	if old != nil {
+		old.End = now
 	}
 
 	t.records = append(t.records, newRecord(name, now))
 
-	new = &t.records[len(t.records)-1]
+	curr = &t.records[len(t.records)-1]
 
 	return
 }
