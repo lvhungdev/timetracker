@@ -34,7 +34,7 @@ func (t table) String() string {
 		content[i] = strings.Join(row, "  ")
 	}
 
-	return header + "\n" + divider + "\n" + strings.Join(content, "\n")
+	return header + "\n" + divider + "\n" + strings.Join(content, "\n") + "\n"
 }
 
 func (t table) alignedHeader() []string {

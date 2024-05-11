@@ -40,17 +40,17 @@ func RenderRecords(writer io.Writer, records []tracker.Record) {
 		end := timeHourString(record.End)
 		total := durationString(record.Start, record.End)
 
-		return []string{date, day, start, end, total}
+		return []string{date, day, record.Name, start, end, total}
 	}
 
-	header := []string{"date", "day", "start", "end", "total"}
+	header := []string{"date", "day", "name", "start", "end", "total"}
 	content := [][]string{}
 	for _, r := range records {
 		content = append(content, serializeRecord(r))
 	}
 
-	table, _ := newTable(header, content)
-	_, err := writer.Write([]byte(table.String()))
+	t, _ := newTable(header, content)
+	_, err := writer.Write([]byte(t.String()))
 	if err != nil {
 		// TODO handle error properly
 		panic(err)

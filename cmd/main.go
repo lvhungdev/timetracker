@@ -47,10 +47,10 @@ func handle(t *tracker.Tracker, args []string) error {
 		if err := t.Save(); err != nil {
 			return err
 		}
-		renderer.RenderRecord(os.Stdout, *old)
-		if curr != nil {
-			renderer.RenderRecord(os.Stdout, *curr)
+		if old != nil {
+			renderer.RenderRecord(os.Stdout, *old)
 		}
+		renderer.RenderRecord(os.Stdout, *curr)
 
 	case cmdStopTracking:
 		r, err := t.StopTracking()
