@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/lvhungdev/tt/renderer"
 	"github.com/lvhungdev/tt/storage"
@@ -20,7 +19,7 @@ func main() {
 	t := tracker.New(&s)
 
 	if err := handle(t, os.Args[1:]); err != nil {
-		fmt.Printf("[ERROR] %v", err)
+		fmt.Println(err)
 	}
 }
 
@@ -63,10 +62,7 @@ func handle(t *tracker.Tracker, args []string) error {
 		renderer.RenderRecord(os.Stdout, *r)
 
 	case cmdReport:
-		now := time.Now()
-		from := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-		to := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.UTC)
-		records := t.GetAll(from, to)
+		records := t.GetAll(cmd.from, cmd.to)
 
 		renderer.RenderRecords(os.Stdout, records)
 	}
