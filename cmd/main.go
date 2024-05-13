@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 
 	"github.com/lvhungdev/tt/renderer"
 	"github.com/lvhungdev/tt/storage"
@@ -11,7 +12,13 @@ import (
 )
 
 func main() {
-	s, err := storage.NewStore(".")
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Printf("unable to get home directory, use current directory instead: %v", err)
+		homeDir = "."
+	}
+
+	s, err := storage.NewStore(path.Join(homeDir, ".timetracker"))
 	if err != nil {
 		log.Fatalf("unable to initialize store %v", err)
 	}

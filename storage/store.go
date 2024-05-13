@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
-	"path/filepath"
+	"path"
 	"time"
 
 	"github.com/lvhungdev/tt/tracker"
@@ -17,7 +17,7 @@ type Store struct {
 }
 
 func NewStore(path string) (Store, error) {
-	err := os.MkdirAll(path, 0666)
+	err := os.MkdirAll(path, 0766)
 	if err != nil {
 		return Store{}, err
 	}
@@ -97,7 +97,7 @@ func (s *Store) save(record tracker.Record) error {
 }
 
 func (s *Store) readFile(name string) ([]byte, error) {
-	file, err := os.Open(filepath.Join(s.path, name))
+	file, err := os.Open(path.Join(s.path, name))
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (s *Store) readFile(name string) ([]byte, error) {
 }
 
 func (s *Store) writeFile(name string, data []byte) error {
-	file, err := os.Create(filepath.Join(s.path, name))
+	file, err := os.Create(path.Join(s.path, name))
 	if err != nil {
 		return err
 	}
