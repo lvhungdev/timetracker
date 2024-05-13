@@ -58,7 +58,7 @@ func TestGetCurrent(t *testing.T) {
 
 func TestStartTracking(t *testing.T) {
 	tracker := New(newMockRepo(nil))
-	old, curr, err := tracker.StartTracking("task 1")
+	old, curr, err := tracker.StartTracking("task 1", time.Time{})
 
 	if err != nil {
 		t.Fatalf("expect error nil, got %v", err)
@@ -72,13 +72,16 @@ func TestStartTracking(t *testing.T) {
 	if curr.Name != "task 1" {
 		t.Fatalf("expect curr.Name 'task 1', got '%v'", curr.Name)
 	}
+	if curr.Start.IsZero() {
+		t.Fatalf("expect curr.Start to have value, got zero value")
+	}
 }
 
 func TestStartTrackingWithCurr(t *testing.T) {
 	repo := newMockRepo([]Record{newRecord("task 1", time.Now())})
 	tracker := New(repo)
 
-	old, curr, err := tracker.StartTracking("task 2")
+	old, curr, err := tracker.StartTracking("task 2", time.Time{})
 
 	if err != nil {
 		t.Fatalf("expect error nil, got %v", err)
@@ -100,10 +103,42 @@ func TestStartTrackingWithCurr(t *testing.T) {
 	}
 }
 
+func TestStartTrackingWithTimeSpecified(t *testing.T) {
+	at := time.Now().Add(-time.Hour)
+	tracker := New(newMockRepo(nil))
+
+	old, curr, err := tracker.StartTracking("task 1", at)
+	if err != nil {
+		t.Fatalf("expect error nil, got %v", err)
+	}
+	if old != nil {
+		t.Fatalf("expect old nil, got not nil")
+	}
+	if curr == nil {
+		t.Fatalf("expect curr not nil, got nil")
+	}
+	if curr.Name != "task 1" {
+		t.Fatalf("expect curr.Name 'task 1', got '%v'", curr.Name)
+	}
+	if curr.Start != at {
+		t.Fatalf("expect curr.Start '%s 1', got '%s'", at, curr.Start)
+	}
+}
+
+func TestStartTrackingWithTimeSpecifiedBeforeOldStart(t *testing.T) {
+	now := time.Now()
+	tracker := New(newMockRepo([]Record{newRecord("task 1", now)}))
+
+	_, _, err := tracker.StartTracking("task 1", now.Add(-time.Hour))
+	if err == nil {
+		t.Fatalf("expect error not nil, got nil")
+	}
+}
+
 func TestStartTrackingEmptyName(t *testing.T) {
 	tracker := New(newMockRepo(nil))
 
-	_, _, err := tracker.StartTracking("")
+	_, _, err := tracker.StartTracking("", time.Time{})
 
 	if err == nil {
 		t.Fatalf("expect error not nil, got error nil")
@@ -114,7 +149,7 @@ func TestStopTracking(t *testing.T) {
 	repo := newMockRepo([]Record{newRecord("task 1", time.Now())})
 	tracker := New(repo)
 
-	curr, err := tracker.StopTracking()
+	curr, err := tracker.StopTracking(time.Time{})
 	if err != nil {
 		t.Fatalf("expect err nil, got not nil")
 	}
@@ -126,10 +161,35 @@ func TestStopTracking(t *testing.T) {
 	}
 }
 
-func TestStopTrackingError(t *testing.T) {
+func TestStopTrackingWithoutCurrent(t *testing.T) {
 	tracker := New(newMockRepo(nil))
 
-	_, err := tracker.StopTracking()
+	_, err := tracker.StopTracking(time.Time{})
+	if err == nil {
+		t.Fatalf("expect err not nil, got nil")
+	}
+}
+
+func TestStopTrackingWithTimeSpecified(t *testing.T) {
+	now := time.Now()
+	repo := newMockRepo([]Record{newRecord("task 1", now.Add(-time.Hour*2))})
+	tracker := New(repo)
+
+	curr, err := tracker.StopTracking(now.Add(-time.Hour))
+	if err != nil {
+		t.Fatalf("expect err nil, got not nil")
+	}
+	if curr.End != now.Add(-time.Hour) {
+		t.Fatalf("expect curr.End '%s', got '%s'", now.Add(-time.Hour), curr.End)
+	}
+}
+
+func TestStopTrackingWithTimeSpecifiedBeforeStart(t *testing.T) {
+	now := time.Now()
+	repo := newMockRepo([]Record{newRecord("task 1", now)})
+	tracker := New(repo)
+
+	_, err := tracker.StopTracking(now.Add(-time.Hour))
 	if err == nil {
 		t.Fatalf("expect err not nil, got nil")
 	}

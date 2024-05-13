@@ -46,7 +46,7 @@ func handle(t *tracker.Tracker, args []string) error {
 		renderer.RenderRecord(os.Stdout, *r)
 
 	case cmdStartTracking:
-		old, curr, err := t.StartTracking(cmd.name)
+		old, curr, err := t.StartTracking(cmd.name, cmd.time())
 		if err != nil {
 			return err
 		}
@@ -59,7 +59,7 @@ func handle(t *tracker.Tracker, args []string) error {
 		renderer.RenderRecord(os.Stdout, *curr)
 
 	case cmdStopTracking:
-		r, err := t.StopTracking()
+		r, err := t.StopTracking(cmd.time())
 		if err != nil {
 			return err
 		}
