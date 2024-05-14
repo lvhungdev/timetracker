@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/lvhungdev/tt/command"
 	"github.com/lvhungdev/tt/renderer"
 	"github.com/lvhungdev/tt/storage"
 	"github.com/lvhungdev/tt/tracker"
@@ -31,13 +32,13 @@ func main() {
 }
 
 func handle(t *tracker.Tracker, args []string) error {
-	cmd, err := getCommand(args)
+	cmd, err := command.Get(args)
 	if err != nil {
 		return err
 	}
 
 	switch cmd := cmd.(type) {
-	case cmdGetCurrent:
+	case command.GetCurrent:
 		r := t.GetCurrent()
 		if r == nil {
 			fmt.Println("no active time tracking")
@@ -45,8 +46,8 @@ func handle(t *tracker.Tracker, args []string) error {
 		}
 		renderer.RenderRecord(os.Stdout, *r)
 
-	case cmdStartTracking:
-		old, curr, err := t.StartTracking(cmd.name, cmd.time())
+	case command.StartTracking:
+		old, curr, err := t.StartTracking(cmd.Name, cmd.Time())
 		if err != nil {
 			return err
 		}
@@ -58,8 +59,8 @@ func handle(t *tracker.Tracker, args []string) error {
 		}
 		renderer.RenderRecord(os.Stdout, *curr)
 
-	case cmdStopTracking:
-		r, err := t.StopTracking(cmd.time())
+	case command.StopTracking:
+		r, err := t.StopTracking(cmd.Time())
 		if err != nil {
 			return err
 		}
@@ -68,8 +69,8 @@ func handle(t *tracker.Tracker, args []string) error {
 		}
 		renderer.RenderRecord(os.Stdout, *r)
 
-	case cmdReport:
-		records := t.GetAll(cmd.from, cmd.to)
+	case command.Report:
+		records := t.GetAll(cmd.From, cmd.To)
 
 		renderer.RenderRecords(os.Stdout, records)
 	}

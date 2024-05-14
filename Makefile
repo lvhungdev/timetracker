@@ -1,5 +1,5 @@
 default:
-	go run ./cmd/
+	go run ./
 
 test:
 	go test ./...
