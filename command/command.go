@@ -69,7 +69,7 @@ func parseStartTracking(args []string) (Command, error) {
 
 	name := strings.Join(
 		slices.DeleteFunc(args, func(s string) bool {
-			return s == args[idx]
+			return idx != -1 && s == args[idx]
 		}),
 		" ")
 
